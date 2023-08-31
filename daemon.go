@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Vivino/go-shezmu/caller"
 	"github.com/juju/ratelimit"
-	"github.com/localhots/shezmu/caller"
 )
 
 // Daemon is the interface that contains a set of methods required to be

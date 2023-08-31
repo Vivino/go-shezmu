@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/localhots/shezmu/stats"
+	"github.com/Vivino/go-shezmu/stats"
 )
 
 // Shezmu is the master daemon.

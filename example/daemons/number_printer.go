@@ -4,7 +4,7 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/localhots/shezmu"
+	"github.com/Vivino/go-shezmu"
 )
 
 // NumberPrinter is a daemon that prints numbers once in a while.
