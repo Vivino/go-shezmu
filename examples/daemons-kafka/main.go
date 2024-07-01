@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"os"
 	"os/signal"
@@ -14,7 +15,12 @@ import (
 	"github.com/Vivino/go-shezmu/stats"
 )
 
+var tracker = func(ctx context.Context, name string) func() {
+	return func() {}
+}
+
 func main() {
+	ctx := context.Background()
 	var brokers string
 
 	flag.StringVar(&brokers, "brokers", "127.0.0.1:9092", "Kafka broker addresses separated by space")
@@ -36,7 +42,7 @@ func main() {
 	s.AddDaemon(&daemons.NumberPrinter{})
 	s.AddDaemon(&daemons.PriceConsumer{})
 
-	s.StartDaemons()
+	s.StartDaemons(ctx, tracker)
 	defer s.StopDaemons()
 
 	sig := make(chan os.Signal)
@@ -44,7 +50,7 @@ func main() {
 	switch <-sig {
 	case syscall.SIGHUP:
 		s.StopDaemons()
-		s.StartDaemons()
+		s.StartDaemons(ctx, tracker)
 	case syscall.SIGINT:
 		return
 	}
