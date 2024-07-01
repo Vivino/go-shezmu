@@ -49,13 +49,10 @@ type BaseDaemon struct {
 	name         string
 	queue        chan<- *task
 	logger       Logger
-	panicHandler PanicHandler
+	panicHandler func(error)
 	shutdown     chan struct{}
 	limit        *ratelimit.Bucket
 }
-
-// PanicHandler is a function that handles panics. Duh!
-type PanicHandler func(error)
 
 // Process creates a task and then adds it to processing queue.
 func (d *BaseDaemon) Process(a Actor) {
@@ -99,7 +96,7 @@ func (d *BaseDaemon) LimitRate(times int, per time.Duration) {
 }
 
 // HandlePanics sets up a panic handler function for the daemon.
-func (d *BaseDaemon) HandlePanics(f PanicHandler) {
+func (d *BaseDaemon) HandlePanics(f func(error)) {
 	d.panicHandler = f
 }
 
