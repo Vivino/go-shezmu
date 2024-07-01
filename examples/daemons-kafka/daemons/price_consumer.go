@@ -3,7 +3,7 @@ package daemons
 import (
 	"time"
 
-	"github.com/localhots/shezmu/consumer"
+	"github.com/Vivino/go-shezmu/consumer"
 )
 
 // PriceConsumer consumes price update messages and prints them to the console.

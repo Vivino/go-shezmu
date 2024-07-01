@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/Vivino/go-shezmu"
 	hr "github.com/julienschmidt/httprouter"
-	"github.com/localhots/shezmu"
 )
 
 // Server is an implementation of HTTP server that executes requests using

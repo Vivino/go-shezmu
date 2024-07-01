@@ -1,20 +1,26 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"os"
 	"os/signal"
 	"strings"
 	"syscall"
 
-	"github.com/localhots/shezmu"
-	"github.com/localhots/shezmu/examples/daemons-kafka/daemons"
-	"github.com/localhots/shezmu/examples/daemons-kafka/kafka"
-	"github.com/localhots/shezmu/server"
-	"github.com/localhots/shezmu/stats"
+	"github.com/Vivino/go-shezmu"
+	"github.com/Vivino/go-shezmu/examples/daemons-kafka/daemons"
+	"github.com/Vivino/go-shezmu/examples/daemons-kafka/kafka"
+	"github.com/Vivino/go-shezmu/server"
+	"github.com/Vivino/go-shezmu/stats"
 )
 
+var tracker = func(ctx context.Context, name string) func() {
+	return func() {}
+}
+
 func main() {
+	ctx := context.Background()
 	var brokers string
 
 	flag.StringVar(&brokers, "brokers", "127.0.0.1:9092", "Kafka broker addresses separated by space")
@@ -36,7 +42,7 @@ func main() {
 	s.AddDaemon(&daemons.NumberPrinter{})
 	s.AddDaemon(&daemons.PriceConsumer{})
 
-	s.StartDaemons()
+	s.StartDaemons(ctx, tracker)
 	defer s.StopDaemons()
 
 	sig := make(chan os.Signal)
@@ -44,7 +50,7 @@ func main() {
 	switch <-sig {
 	case syscall.SIGHUP:
 		s.StopDaemons()
-		s.StartDaemons()
+		s.StartDaemons(ctx, tracker)
 	case syscall.SIGINT:
 		return
 	}
