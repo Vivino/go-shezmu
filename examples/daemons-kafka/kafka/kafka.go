@@ -9,7 +9,7 @@ import (
 	"sync"
 
 	"github.com/Shopify/sarama"
-	"github.com/localhots/shezmu/consumer"
+	"github.com/Vivino/go-shezmu/consumer"
 )
 
 // ConsumerState contains data that is required to create a Kafka consumer.

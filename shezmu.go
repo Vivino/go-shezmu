@@ -11,7 +11,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/localhots/shezmu/stats"
+	"github.com/Vivino/go-shezmu/stats"
 )
 
 // Shezmu is the master daemon.
@@ -47,7 +47,10 @@ type task struct {
 	name      string
 }
 
-type tracer func(ctx context.Context, name string) func()
+// Tracer defines a function for local tracking.
+// Returns a function that ends the benchmarking per se.
+// Remember to call that directly accordingly or to defer call it.
+type Tracer func(ctx context.Context, name string) func()
 
 const (
 	// DefaultNumWorkers is the default number of workers that would process
@@ -86,7 +89,7 @@ func (s *Shezmu) ClearDaemons() {
 }
 
 // StartDaemons starts all registered daemons.
-func (s *Shezmu) StartDaemons(ctx context.Context, track tracer) {
+func (s *Shezmu) StartDaemons(ctx context.Context, track Tracer) {
 	s.Logger.Printf("Starting %d workers", s.NumWorkers)
 	for i := 0; i < s.NumWorkers; i++ {
 		go s.runWorker(ctx, track)
@@ -149,7 +152,7 @@ func (s *Shezmu) setupDaemon(d Daemon) {
 	}
 }
 
-func (s *Shezmu) runWorker(ctx context.Context, track tracer) {
+func (s *Shezmu) runWorker(ctx context.Context, track Tracer) {
 	s.wgWorkers.Add(1)
 	defer s.wgWorkers.Done()
 	defer func() {
@@ -170,7 +173,7 @@ func (s *Shezmu) runWorker(ctx context.Context, track tracer) {
 	}
 }
 
-func (s *Shezmu) processTask(ctx context.Context, t *task, track tracer) {
+func (s *Shezmu) processTask(ctx context.Context, t *task, track Tracer) {
 	stop := track(ctx, t.daemon.String())
 	defer stop()
 	dur := time.Now().Sub(t.createdAt)

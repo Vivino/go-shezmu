@@ -3,9 +3,9 @@ package main
 import (
 	"net/http"
 
+	"github.com/Vivino/go-shezmu"
+	shezttp "github.com/Vivino/go-shezmu/http"
 	"github.com/julienschmidt/httprouter"
-	"github.com/localhots/shezmu"
-	shezttp "github.com/localhots/shezmu/http"
 )
 
 func main() {

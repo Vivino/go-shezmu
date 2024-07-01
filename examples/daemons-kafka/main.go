@@ -7,11 +7,11 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/localhots/shezmu"
-	"github.com/localhots/shezmu/examples/daemons-kafka/daemons"
-	"github.com/localhots/shezmu/examples/daemons-kafka/kafka"
-	"github.com/localhots/shezmu/server"
-	"github.com/localhots/shezmu/stats"
+	"github.com/Vivino/go-shezmu"
+	"github.com/Vivino/go-shezmu/examples/daemons-kafka/daemons"
+	"github.com/Vivino/go-shezmu/examples/daemons-kafka/kafka"
+	"github.com/Vivino/go-shezmu/server"
+	"github.com/Vivino/go-shezmu/stats"
 )
 
 func main() {

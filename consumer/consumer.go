@@ -4,8 +4,8 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/Vivino/go-shezmu"
 	"github.com/localhots/caller"
-	"github.com/localhots/shezmu"
 )
 
 // Subscriber is the interface that is used by daemons to subscribe to messages.

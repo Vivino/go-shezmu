@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/localhots/shezmu/stats"
+	"github.com/Vivino/go-shezmu/stats"
 )
 
 type Server struct {
