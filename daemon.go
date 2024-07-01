@@ -49,7 +49,7 @@ type BaseDaemon struct {
 	name         string
 	queue        chan<- *task
 	logger       Logger
-	panicHandler func(error)
+	panicHandler func(interface{})
 	shutdown     chan struct{}
 	limit        *ratelimit.Bucket
 }
@@ -96,7 +96,7 @@ func (d *BaseDaemon) LimitRate(times int, per time.Duration) {
 }
 
 // HandlePanics sets up a panic handler function for the daemon.
-func (d *BaseDaemon) HandlePanics(f func(error)) {
+func (d *BaseDaemon) HandlePanics(f func(interface{})) {
 	d.panicHandler = f
 }
 
