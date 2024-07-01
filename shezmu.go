@@ -1,6 +1,7 @@
 package shezmu
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -46,7 +47,7 @@ type task struct {
 	name      string
 }
 
-type tracer func(name string) func()
+type tracer func(ctx context.Context, name string) func()
 
 const (
 	// DefaultNumWorkers is the default number of workers that would process
@@ -85,10 +86,10 @@ func (s *Shezmu) ClearDaemons() {
 }
 
 // StartDaemons starts all registered daemons.
-func (s *Shezmu) StartDaemons(track tracer) {
+func (s *Shezmu) StartDaemons(ctx context.Context, track tracer) {
 	s.Logger.Printf("Starting %d workers", s.NumWorkers)
 	for i := 0; i < s.NumWorkers; i++ {
-		go s.runWorker(track)
+		go s.runWorker(ctx, track)
 	}
 
 	s.Logger.Println("Setting up daemons")
@@ -148,29 +149,29 @@ func (s *Shezmu) setupDaemon(d Daemon) {
 	}
 }
 
-func (s *Shezmu) runWorker(track tracer) {
+func (s *Shezmu) runWorker(ctx context.Context, track tracer) {
 	s.wgWorkers.Add(1)
 	defer s.wgWorkers.Done()
 	defer func() {
 		if err := recover(); err != nil {
 			s.Logger.Printf("Worker crashed. Error: %v\n", err)
 			debug.PrintStack()
-			go s.runWorker(track) // Restarting worker
+			go s.runWorker(ctx, track) // Restarting worker
 		}
 	}()
 
 	for {
 		select {
 		case t := <-s.queue:
-			s.processTask(t, track)
+			s.processTask(ctx, t, track)
 		case <-s.shutdownWorkers:
 			return
 		}
 	}
 }
 
-func (s *Shezmu) processTask(t *task, track tracer) {
-	stop := track(t.daemon.String())
+func (s *Shezmu) processTask(ctx context.Context, t *task, track tracer) {
+	stop := track(ctx, t.daemon.String())
 	defer stop()
 	dur := time.Now().Sub(t.createdAt)
 	s.runtimeStats.Add(stats.Latency, dur)
