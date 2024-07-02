@@ -31,7 +31,7 @@ type Shezmu struct {
 }
 
 // Actor is a function that could be executed by daemon workers.
-type Actor func()
+type Actor func(context.Context)
 
 // Logger is the interface that implements minimal logging functions.
 type Logger interface {
@@ -180,13 +180,13 @@ func (s *Shezmu) processTask(ctx context.Context, t *task, track Tracer) {
 	s.runtimeStats.Add(stats.Latency, dur)
 
 	if t.system {
-		s.processSystemTask(t)
+		s.processSystemTask(ctx, t)
 	} else {
-		s.processGeneralTask(t)
+		s.processGeneralTask(ctx, t)
 	}
 }
 
-func (s *Shezmu) processSystemTask(t *task) {
+func (s *Shezmu) processSystemTask(ctx context.Context, t *task) {
 	// Abort starting a system task if shutdown was already called. Otherwise
 	// incrementing a wait group counter will cause a panic. This should be an
 	// extremely rare scenario when a system task crashes and tries to restart
@@ -212,10 +212,10 @@ func (s *Shezmu) processSystemTask(t *task) {
 	}()
 
 	s.Logger.Printf("Starting system task %s\n", t)
-	t.actor() // <--- ACTION STARTS HERE
+	t.actor(ctx) // <--- ACTION STARTS HERE
 }
 
-func (s *Shezmu) processGeneralTask(t *task) {
+func (s *Shezmu) processGeneralTask(ctx context.Context, t *task) {
 	defer func() {
 		if val := recover(); val != nil {
 			err := interfaceToError(val)
@@ -230,7 +230,7 @@ func (s *Shezmu) processGeneralTask(t *task) {
 		s.DaemonStats.Add(t.daemon.String(), dur)
 	}(time.Now())
 
-	t.actor() // <--- ACTION STARTS HERE
+	t.actor(ctx) // <--- ACTION STARTS HERE
 }
 
 func (t *task) String() string {
