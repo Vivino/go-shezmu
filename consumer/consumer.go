@@ -1,7 +1,6 @@
 package consumer
 
 import (
-	"context"
 	"errors"
 	"fmt"
 
@@ -52,7 +51,7 @@ func (c *Consumer) Publish(topic string, msg []byte, meta interface{}) {
 // Subscribe subscriasdsdfsdgdfgdfsg sdgsdfg sdfgs dfgdfgdfg.
 func (c *Consumer) Subscribe(topic string, fun interface{}) {
 	name := fmt.Sprintf("subscription for topic %q", topic)
-	c.SystemProcess(name, func(ctx context.Context) {
+	c.SystemProcess(name, func() {
 		if c.subscriber == nil {
 			panic(errMissingSubscriber)
 		}
@@ -68,7 +67,7 @@ func (c *Consumer) Subscribe(topic string, fun interface{}) {
 		for {
 			select {
 			case msg := <-stream.Messages():
-				c.Process(func(ctx context.Context) { cf.Call(msg) })
+				c.Process(func() { cf.Call(msg) })
 			case <-c.ShutdownRequested():
 				return
 			}

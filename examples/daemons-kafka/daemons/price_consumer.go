@@ -1,7 +1,6 @@
 package daemons
 
 import (
-	"context"
 	"time"
 
 	"github.com/Vivino/go-shezmu/consumer"
@@ -19,7 +18,7 @@ type PriceUpdate struct {
 }
 
 // Startup creates a new subscription for ProductPriceUpdates topic.
-func (p *PriceConsumer) Startup(ctx context.Context) {
+func (p *PriceConsumer) Startup() {
 	p.Subscribe("ProductPriceUpdates", func(u PriceUpdate) {
 		p.Logf("Price for %q is now $%.2f", u.Product, u.Amount)
 	})

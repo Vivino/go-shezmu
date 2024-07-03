@@ -1,7 +1,6 @@
 package http
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 
@@ -71,7 +70,7 @@ func (s *Server) addHandlerDaemon(path string, handle hr.Handle) hr.Handle {
 
 func (h *handler) process(w http.ResponseWriter, r *http.Request, params hr.Params) {
 	wait := make(chan struct{})
-	h.Process(func(ctx context.Context) {
+	h.Process(func() {
 		defer close(wait)
 		h.handle(w, r, params)
 	})

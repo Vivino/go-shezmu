@@ -1,7 +1,6 @@
 package daemons
 
 import (
-	"context"
 	"math/rand"
 	"time"
 
@@ -14,7 +13,7 @@ type NumberPrinter struct {
 }
 
 // Startup sets up panic handler and starts enqueuing number printing jobs.
-func (n *NumberPrinter) Startup(ctx context.Context) {
+func (n *NumberPrinter) Startup() {
 	n.HandlePanics(func(err interface{}) {
 		n.Logf("Oh, crap! There was a panic, take a look: %v", err)
 	})
@@ -23,7 +22,7 @@ func (n *NumberPrinter) Startup(ctx context.Context) {
 	n.SystemProcess("Random Number Generator", n.generateNumbers)
 }
 
-func (n *NumberPrinter) generateNumbers(ctx context.Context) {
+func (n *NumberPrinter) generateNumbers() {
 	for n.Continue() {
 		if rand.Intn(10) == 0 {
 			panic("Number generator refuses to work right now!")
@@ -35,7 +34,7 @@ func (n *NumberPrinter) generateNumbers(ctx context.Context) {
 }
 
 func (n *NumberPrinter) makeActor(num int) shezmu.Actor {
-	return func(ctx context.Context) {
+	return func() {
 		n.Log("Number printer says:", num)
 
 		// Making it crash sometimes

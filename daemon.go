@@ -1,7 +1,6 @@
 package shezmu
 
 import (
-	"context"
 	"fmt"
 	"strings"
 	"time"
@@ -30,7 +29,7 @@ type Daemon interface {
 	// 	       log.Printf("Price for %q is now $%.2f", p.Product, p.Amount)
 	//     })
 	// }
-	Startup(ctx context.Context)
+	Startup()
 
 	// Shutdown implementation should clean up all daemon related stuff:
 	// close channels, process the last batch of items, etc.
@@ -133,7 +132,7 @@ func (d *BaseDaemon) Logf(format string, v ...interface{}) {
 
 // Startup is the empty implementation of the daemons' Startup function that
 // is inherited and used by default.
-func (d *BaseDaemon) Startup(context.Context) {}
+func (d *BaseDaemon) Startup() {}
 
 // Shutdown is the empty implementation of the daemons' Shutdown function that
 // is inherited and used by default.

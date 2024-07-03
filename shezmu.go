@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/Vivino/go-shezmu/stats"
-	"github.com/Vivino/go-tools/contx"
 )
 
 // Shezmu is the master daemon.
@@ -32,7 +31,7 @@ type Shezmu struct {
 }
 
 // Actor is a function that could be executed by daemon workers.
-type Actor func(context.Context)
+type Actor func()
 
 // Logger is the interface that implements minimal logging functions.
 type Logger interface {
@@ -90,10 +89,10 @@ func (s *Shezmu) ClearDaemons() {
 }
 
 // StartDaemons starts all registered daemons.
-func (s *Shezmu) StartDaemons(ctx context.Context, track Tracer) {
+func (s *Shezmu) StartDaemons(track Tracer) {
 	s.Logger.Printf("Starting %d workers", s.NumWorkers)
 	for i := 0; i < s.NumWorkers; i++ {
-		go s.runWorker(ctx, track)
+		go s.runWorker(track)
 	}
 
 	s.Logger.Println("Setting up daemons")
@@ -154,44 +153,39 @@ func (s *Shezmu) setupDaemon(d Daemon) {
 	}
 }
 
-func (s *Shezmu) runWorker(ctx context.Context, track Tracer) {
+func (s *Shezmu) runWorker(track Tracer) {
 	s.wgWorkers.Add(1)
 	defer s.wgWorkers.Done()
 	defer func() {
 		if err := recover(); err != nil {
 			s.Logger.Printf("Worker crashed. Error: %v\n", err)
 			debug.PrintStack()
-			go s.runWorker(ctx, track) // Restarting worker
+			go s.runWorker(track) // Restarting worker
 		}
 	}()
 
 	for {
 		select {
 		case t := <-s.queue:
-			s.processTask(ctx, t, track)
+			s.processTask(t, track)
 		case <-s.shutdownWorkers:
 			return
 		}
 	}
 }
 
-func (s *Shezmu) processTask(ctx context.Context, t *task, track Tracer) {
-	dName := t.daemon.String()
-	ctx, stop := track(ctx, dName)
-	defer stop()
-	contx.Logger(ctx).Infof("Start: %s", dName)
+func (s *Shezmu) processTask(t *task, track Tracer) {
 	dur := time.Now().Sub(t.createdAt)
 	s.runtimeStats.Add(stats.Latency, dur)
 
 	if t.system {
-		s.processSystemTask(ctx, t)
+		s.processSystemTask(t)
 	} else {
-		s.processGeneralTask(ctx, t)
+		s.processGeneralTask(t)
 	}
-	contx.Logger(ctx).Infof("Stop: %s", dName)
 }
 
-func (s *Shezmu) processSystemTask(ctx context.Context, t *task) {
+func (s *Shezmu) processSystemTask(t *task) {
 	// Abort starting a system task if shutdown was already called. Otherwise
 	// incrementing a wait group counter will cause a panic. This should be an
 	// extremely rare scenario when a system task crashes and tries to restart
@@ -217,10 +211,10 @@ func (s *Shezmu) processSystemTask(ctx context.Context, t *task) {
 	}()
 
 	s.Logger.Printf("Starting system task %s\n", t)
-	t.actor(ctx) // <--- ACTION STARTS HERE
+	t.actor() // <--- ACTION STARTS HERE
 }
 
-func (s *Shezmu) processGeneralTask(ctx context.Context, t *task) {
+func (s *Shezmu) processGeneralTask(t *task) {
 	defer func() {
 		if val := recover(); val != nil {
 			err := interfaceToError(val)
@@ -235,7 +229,7 @@ func (s *Shezmu) processGeneralTask(ctx context.Context, t *task) {
 		s.DaemonStats.Add(t.daemon.String(), dur)
 	}(time.Now())
 
-	t.actor(ctx) // <--- ACTION STARTS HERE
+	t.actor() // <--- ACTION STARTS HERE
 }
 
 func (t *task) String() string {

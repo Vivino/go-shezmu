@@ -20,7 +20,6 @@ var tracker = func(ctx context.Context, name string) (context.Context, func()) {
 }
 
 func main() {
-	ctx := context.Background()
 	var brokers string
 
 	flag.StringVar(&brokers, "brokers", "127.0.0.1:9092", "Kafka broker addresses separated by space")
@@ -42,7 +41,7 @@ func main() {
 	s.AddDaemon(&daemons.NumberPrinter{})
 	s.AddDaemon(&daemons.PriceConsumer{})
 
-	s.StartDaemons(ctx, tracker)
+	s.StartDaemons(tracker)
 	defer s.StopDaemons()
 
 	sig := make(chan os.Signal)
@@ -50,7 +49,7 @@ func main() {
 	switch <-sig {
 	case syscall.SIGHUP:
 		s.StopDaemons()
-		s.StartDaemons(ctx, tracker)
+		s.StartDaemons(tracker)
 	case syscall.SIGINT:
 		return
 	}
