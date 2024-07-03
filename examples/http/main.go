@@ -9,8 +9,8 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-var tracker = func(ctx context.Context, name string) func() {
-	return func() {}
+var tracker = func(ctx context.Context, name string) (context.Context, func()) {
+	return context.Background(), func() {}
 }
 
 func main() {

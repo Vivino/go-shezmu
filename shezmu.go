@@ -50,7 +50,7 @@ type task struct {
 // Tracer defines a function for local tracking.
 // Returns a function that ends the benchmarking per se.
 // Remember to call that directly accordingly or to defer call it.
-type Tracer func(ctx context.Context, name string) func()
+type Tracer func(ctx context.Context, name string) (context.Context, func())
 
 const (
 	// DefaultNumWorkers is the default number of workers that would process
@@ -122,8 +122,9 @@ func (s *Shezmu) StopDaemons() {
 	fmt.Println(s.runtimeStats.Fetch(stats.Latency))
 }
 
+// HandleSignals handles signals.
 func (s *Shezmu) HandleSignals() {
-	ch := make(chan os.Signal)
+	ch := make(chan os.Signal, 1)
 	signal.Notify(ch, syscall.SIGINT)
 	for {
 		switch sig := <-ch; sig {
@@ -174,7 +175,7 @@ func (s *Shezmu) runWorker(ctx context.Context, track Tracer) {
 }
 
 func (s *Shezmu) processTask(ctx context.Context, t *task, track Tracer) {
-	stop := track(ctx, t.daemon.String())
+	ctx, stop := track(ctx, t.daemon.String())
 	defer stop()
 	dur := time.Now().Sub(t.createdAt)
 	s.runtimeStats.Add(stats.Latency, dur)
