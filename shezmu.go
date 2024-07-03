@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/Vivino/go-shezmu/stats"
+	"github.com/Vivino/go-tools/contx"
 )
 
 // Shezmu is the master daemon.
@@ -175,8 +176,10 @@ func (s *Shezmu) runWorker(ctx context.Context, track Tracer) {
 }
 
 func (s *Shezmu) processTask(ctx context.Context, t *task, track Tracer) {
-	ctx, stop := track(ctx, t.daemon.String())
+	dName := t.daemon.String()
+	ctx, stop := track(ctx, dName)
 	defer stop()
+	contx.Logger(ctx).Infof("Start: %s", dName)
 	dur := time.Now().Sub(t.createdAt)
 	s.runtimeStats.Add(stats.Latency, dur)
 
@@ -185,6 +188,7 @@ func (s *Shezmu) processTask(ctx context.Context, t *task, track Tracer) {
 	} else {
 		s.processGeneralTask(ctx, t)
 	}
+	contx.Logger(ctx).Infof("Stop: %s", dName)
 }
 
 func (s *Shezmu) processSystemTask(ctx context.Context, t *task) {
