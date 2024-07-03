@@ -1,17 +1,12 @@
 package main
 
 import (
-	"context"
 	"net/http"
 
 	"github.com/Vivino/go-shezmu"
 	shezttp "github.com/Vivino/go-shezmu/http"
 	"github.com/julienschmidt/httprouter"
 )
-
-var tracker = func(ctx context.Context, name string) (context.Context, func()) {
-	return context.Background(), func() {}
-}
 
 func main() {
 	sv := shezmu.Summon()
@@ -21,6 +16,6 @@ func main() {
 	})
 	go server.Start()
 
-	sv.StartDaemons(tracker)
+	sv.StartDaemons()
 	sv.HandleSignals()
 }

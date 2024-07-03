@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"flag"
 	"os"
 	"os/signal"
@@ -14,10 +13,6 @@ import (
 	"github.com/Vivino/go-shezmu/server"
 	"github.com/Vivino/go-shezmu/stats"
 )
-
-var tracker = func(ctx context.Context, name string) (context.Context, func()) {
-	return context.Background(), func() {}
-}
 
 func main() {
 	var brokers string
@@ -41,7 +36,7 @@ func main() {
 	s.AddDaemon(&daemons.NumberPrinter{})
 	s.AddDaemon(&daemons.PriceConsumer{})
 
-	s.StartDaemons(tracker)
+	s.StartDaemons()
 	defer s.StopDaemons()
 
 	sig := make(chan os.Signal)
@@ -49,7 +44,7 @@ func main() {
 	switch <-sig {
 	case syscall.SIGHUP:
 		s.StopDaemons()
-		s.StartDaemons(tracker)
+		s.StartDaemons()
 	case syscall.SIGINT:
 		return
 	}
